@@ -265,7 +265,7 @@ static void lex_save_cached(lex_t *lex) {
 }
 
 static void lex_free_string(lex_t *lex) {
-    jsonp_free(lex->value.string.val);
+    jsonp_free(NULL, lex->value.string.val);
     lex->value.string.val = NULL;
     lex->value.string.len = 0;
 }
@@ -355,7 +355,7 @@ static void lex_scan_string(lex_t *lex, json_error_t *error) {
          - two \uXXXX escapes (length 12) forming an UTF-16 surrogate pair
            are converted to 4 bytes
     */
-    t = jsonp_malloc(lex->saved_text.length + 1);
+    t = jsonp_malloc(NULL, lex->saved_text.length + 1);
     if (!t) {
         /* this is not very nice, since TOKEN_INVALID is returned */
         goto out;
@@ -682,7 +682,7 @@ static json_t *parse_object(lex_t *lex, size_t flags, json_error_t *error) {
         if (!key)
             return NULL;
         if (memchr(key, '\0', len)) {
-            jsonp_free(key);
+            jsonp_free(NULL, key);
             error_set(error, lex, json_error_null_byte_in_key,
                       "NUL byte in object key not supported");
             goto error;
@@ -690,7 +690,7 @@ static json_t *parse_object(lex_t *lex, size_t flags, json_error_t *error) {
 
         if (flags & JSON_REJECT_DUPLICATES) {
             if (json_object_getn(object, key, len)) {
-                jsonp_free(key);
+                jsonp_free(NULL, key);
                 error_set(error, lex, json_error_duplicate_key, "duplicate object key");
                 goto error;
             }
@@ -698,7 +698,7 @@ static json_t *parse_object(lex_t *lex, size_t flags, json_error_t *error) {
 
         lex_scan(lex, error);
         if (lex->token != ':') {
-            jsonp_free(key);
+            jsonp_free(NULL, key);
             error_set(error, lex, json_error_invalid_syntax, "':' expected");
             goto error;
         }
@@ -706,16 +706,16 @@ static json_t *parse_object(lex_t *lex, size_t flags, json_error_t *error) {
         lex_scan(lex, error);
         value = parse_value(lex, flags, error);
         if (!value) {
-            jsonp_free(key);
+            jsonp_free(NULL, key);
             goto error;
         }
 
         if (json_object_setn_new_nocheck(object, key, len, value)) {
-            jsonp_free(key);
+            jsonp_free(NULL, key);
             goto error;
         }
 
-        jsonp_free(key);
+        jsonp_free(NULL, key);
 
         lex_scan(lex, error);
         if (lex->token != ',')

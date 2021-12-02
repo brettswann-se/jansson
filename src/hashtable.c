@@ -119,7 +119,7 @@ static int hashtable_do_del(hashtable_t *hashtable, const char *key, size_t key_
     list_remove(&pair->ordered_list);
     json_decref(pair->value);
 
-    jsonp_free(pair);
+    jsonp_free(NULL, pair);
     hashtable->size--;
 
     return 0;
@@ -133,7 +133,7 @@ static void hashtable_do_clear(hashtable_t *hashtable) {
         next = list->next;
         pair = list_to_pair(list);
         json_decref(pair->value);
-        jsonp_free(pair);
+        jsonp_free(NULL, pair);
     }
 }
 
@@ -146,11 +146,11 @@ static int hashtable_do_rehash(hashtable_t *hashtable) {
     new_order = hashtable->order + 1;
     new_size = hashsize(new_order);
 
-    new_buckets = jsonp_malloc(new_size * sizeof(bucket_t));
+    new_buckets = jsonp_malloc(NULL, new_size * sizeof(bucket_t));
     if (!new_buckets)
         return -1;
 
-    jsonp_free(hashtable->buckets);
+    jsonp_free(NULL, hashtable->buckets);
     hashtable->buckets = new_buckets;
     hashtable->order = new_order;
 
@@ -176,7 +176,7 @@ int hashtable_init(hashtable_t *hashtable) {
 
     hashtable->size = 0;
     hashtable->order = INITIAL_HASHTABLE_ORDER;
-    hashtable->buckets = jsonp_malloc(hashsize(hashtable->order) * sizeof(bucket_t));
+    hashtable->buckets = jsonp_malloc(NULL, hashsize(hashtable->order) * sizeof(bucket_t));
     if (!hashtable->buckets)
         return -1;
 
@@ -192,7 +192,7 @@ int hashtable_init(hashtable_t *hashtable) {
 
 void hashtable_close(hashtable_t *hashtable) {
     hashtable_do_clear(hashtable);
-    jsonp_free(hashtable->buckets);
+    jsonp_free(NULL, hashtable->buckets);
 }
 
 static pair_t *init_pair(json_t *value, const char *key, size_t key_len, size_t hash) {
@@ -207,7 +207,7 @@ static pair_t *init_pair(json_t *value, const char *key, size_t key_len, size_t 
         return NULL;
     }
 
-    pair = jsonp_malloc(offsetof(pair_t, key) + key_len + 1);
+    pair = jsonp_malloc(NULL, offsetof(pair_t, key) + key_len + 1);
 
     if (!pair)
         return NULL;

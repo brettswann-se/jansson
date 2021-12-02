@@ -63,6 +63,9 @@ typedef struct json_t {
     volatile size_t refcount;
 } json_t;
 
+/* optional custom allocator */
+typedef void* json_allocator_t;
+
 #ifndef JANSSON_USING_CMAKE /* disabled if using cmake */
 #if JSON_INTEGER_IS_LONG_LONG
 #ifdef _WIN32
@@ -400,9 +403,8 @@ int json_dump_callback(const json_t *json, json_dump_callback_t callback, void *
                        size_t flags);
 
 /* custom memory allocation */
-
-typedef void *(*json_malloc_t)(size_t);
-typedef void (*json_free_t)(void *);
+typedef void *(*json_malloc_t)(json_allocator_t, size_t);
+typedef void (*json_free_t)(json_allocator_t, void *);
 
 void json_set_alloc_funcs(json_malloc_t malloc_fn, json_free_t free_fn);
 void json_get_alloc_funcs(json_malloc_t *malloc_fn, json_free_t *free_fn);

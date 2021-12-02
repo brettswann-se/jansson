@@ -16,22 +16,38 @@
 #undef malloc
 #undef free
 
-/* memory function pointers */
-static json_malloc_t do_malloc = malloc;
-static json_free_t do_free = free;
+/* internal functions to wrap the use of malloc/free, ignoring the allocator arg */
+static void *malloc_wrapper(json_allocator_t allocator, size_t size);
+static void free_wrapper(json_allocator_t allocator, void *ptr);
 
-void *jsonp_malloc(size_t size) {
+/* memory function pointers */
+static json_malloc_t do_malloc = malloc_wrapper;
+static json_free_t do_free = free_wrapper;
+
+static void *malloc_wrapper(json_allocator_t allocator, size_t size)
+{
+    (void)allocator;
+    return malloc(size);
+}
+
+static void free_wrapper(json_allocator_t allocator, void *ptr)
+{
+    (void)allocator;
+    free(ptr);
+}
+
+void *jsonp_malloc(json_allocator_t allocator, size_t size) {
     if (!size)
         return NULL;
 
-    return (*do_malloc)(size);
+    return (*do_malloc)(NULL, size);
 }
 
-void jsonp_free(void *ptr) {
+void jsonp_free(json_allocator_t allocator, void *ptr) {
     if (!ptr)
         return;
 
-    (*do_free)(ptr);
+    (*do_free)(NULL, ptr);
 }
 
 char *jsonp_strdup(const char *str) { return jsonp_strndup(str, strlen(str)); }
@@ -39,7 +55,7 @@ char *jsonp_strdup(const char *str) { return jsonp_strndup(str, strlen(str)); }
 char *jsonp_strndup(const char *str, size_t len) {
     char *new_str;
 
-    new_str = jsonp_malloc(len + 1);
+    new_str = jsonp_malloc(NULL, len + 1);
     if (!new_str)
         return NULL;
 

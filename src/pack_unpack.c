@@ -244,7 +244,7 @@ static json_t *pack_object(scanner_t *s, va_list *ap) {
         value = pack(s, ap);
         if (!value) {
             if (ours)
-                jsonp_free(key);
+                jsonp_free(NULL, key);
 
             if (valueOptional != '*') {
                 set_error(s, "<args>", json_error_null_value, "NULL object value");
@@ -265,7 +265,7 @@ static json_t *pack_object(scanner_t *s, va_list *ap) {
         }
 
         if (ours)
-            jsonp_free(key);
+            jsonp_free(NULL, key);
 
         next_token(s);
     }

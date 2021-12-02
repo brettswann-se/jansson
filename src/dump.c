@@ -338,7 +338,7 @@ static int do_dump(const json_t *json, size_t flags, int depth, hashtable_t *par
                 size_t size, i;
 
                 size = json_object_size(json);
-                keys = jsonp_malloc(size * sizeof(struct key_len));
+                keys = jsonp_malloc(NULL, size * sizeof(struct key_len));
                 if (!keys)
                     return -1;
 
@@ -367,25 +367,25 @@ static int do_dump(const json_t *json, size_t flags, int depth, hashtable_t *par
                     dump_string(key->key, key->len, dump, data, flags);
                     if (dump(separator, separator_length, data) ||
                         do_dump(value, flags, depth + 1, parents, dump, data)) {
-                        jsonp_free(keys);
+                        jsonp_free(NULL, keys);
                         return -1;
                     }
 
                     if (i < size - 1) {
                         if (dump(",", 1, data) ||
                             dump_indent(flags, depth + 1, 1, dump, data)) {
-                            jsonp_free(keys);
+                            jsonp_free(NULL, keys);
                             return -1;
                         }
                     } else {
                         if (dump_indent(flags, depth, 0, dump, data)) {
-                            jsonp_free(keys);
+                            jsonp_free(NULL, keys);
                             return -1;
                         }
                     }
                 }
 
-                jsonp_free(keys);
+                jsonp_free(NULL, keys);
             } else {
                 /* Don't sort keys */
 
